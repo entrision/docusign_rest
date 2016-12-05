@@ -968,6 +968,42 @@ module DocusignRest
       JSON.parse(response.body)
     end
 
+    def update_recipients(options = {})
+      content_type = { 'Content-Type' => 'application/json' }
+      content_type.merge(options[:headers]) if options[:headers]
+
+      post_body = {
+        signers:         options[:signers],
+        resend_envelope: options[:resend_envelope]
+      }.to_json
+
+      uri = build_uri("/accounts/#{acct_id}/envelopes/#{options[:envelope_id]}/recipients")
+
+      http = initialize_net_http_ssl(uri)
+      request = Net::HTTP::Put.new(uri.request_uri, headers(content_type))
+      request.body = post_body
+      response = http.request(request)
+
+      JSON.parse(response.body)
+    end
+
+    def send_envelope(envelope_id)
+      content_type = { 'Content-Type' => 'application/json' }
+
+      post_body = {
+        status: 'sent'
+      }.to_json
+
+      uri = build_uri("/accounts/#{acct_id}/envelopes/#{envelope_id}")
+
+      http = initialize_net_http_ssl(uri)
+      request = Net::HTTP::Put.new(uri.request_uri, headers(content_type))
+      request.body = post_body
+      response = http.request(request)
+
+      JSON.parse(response.body)
+    end
+
 
     # Public returns the names specified for a given email address (existing docusign user)
     #
@@ -1185,6 +1221,17 @@ module DocusignRest
       JSON.parse(response.body)
     end
 
+    def get_document_for_template(document_id, template_id, options = {})
+      content_type = { 'Content-Type' => 'application/json' }
+      content_type.merge(options[:headers]) if options[:headers]
+
+      uri = build_uri("/accounts/#{acct_id}/templates/#{template_id}/documents/#{document_id}")
+
+      http = initialize_net_http_ssl(uri)
+      request = Net::HTTP::Get.new(uri.request_uri, headers(content_type))
+      response = http.request(request)
+      JSON.parse(response.body)
+    end
 
     # Public retrieves a png of a page of a document in an envelope
     #
